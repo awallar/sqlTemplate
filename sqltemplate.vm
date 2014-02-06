@@ -18,7 +18,7 @@
 
         -- search for ID in INTERFACES for a given interface name and router name
 
-                OPEN cv for srcInterfaceStmnt USING '$pe_interface_dummy', '$dummy_router_name' ;
+                OPEN cv for srcInterfaceStmnt USING '$srcInterface', '$srcRouter' ;
         LOOP
         FETCH cv INTO interfaceID, interfaceName;
         DBMS_OUTPUT.PUT_LINE(interfaceID);

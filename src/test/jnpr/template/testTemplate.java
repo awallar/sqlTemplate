@@ -11,23 +11,16 @@ import java.io.StringWriter;
 
 public class testTemplate {
 
-    public static void main(String args[])
-    throws Exception{
+    public static void main(String args[]) throws Exception{
 
-        Properties velocityProperties = new Properties();
-        velocityProperties.setProperty("file.resource.loader.path", "C:\\Users\\awallar\\PSGithub");
+        String srcInterface = "srcInterfaceReal";
+        String srcRouter = "srcRouterReal";
+        String dstInterface = "dstInterfaceReal";
+        String dstRouter = "dstRouterReal";
+        String templateFile= "sqltemplate.vm";
+        String templatePath= "C:\\Users\\awallar\\PSGithub\\sqlTemplate";
 
-        VelocityEngine ve=new VelocityEngine();
-        ve.init(velocityProperties);
-
-        VelocityContext context = new VelocityContext();
-        context.put("pe_interface_dummy", "dummy_interface_pe");
-        context.put("dummy_router_name", "name_dummy_router");
-
-        StringWriter writer = new StringWriter();
-
-        ve.mergeTemplate("sqltemplate.vm", "UTF-8" ,context, writer);
-        System.out.println(writer.toString());
-
+        sqlTemplate ST= new sqlTemplate(srcInterface,srcRouter,dstInterface,dstRouter, templateFile,templatePath);
+        ST.evaluate();
     }
 }
