@@ -18,7 +18,7 @@ public class testTemplate {
         String dstInterface = "dstInterfaceReal";
         String dstRouter = "dstRouterReal";
         String templateFile= "sqltemplate.vm";
-        String templatePath= "C:\\Users\\awallar\\PSGithub\\sqlTemplate";
+        String templatePath= "/Users/jnickerson/Documents/develop/juniper/Optus/sqlTemplate";
 
         sqlTemplate ST= new sqlTemplate(srcInterface,srcRouter,dstInterface,dstRouter, templateFile,templatePath);
         ST.evaluate();
