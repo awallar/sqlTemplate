@@ -22,6 +22,7 @@ BEGIN
         WHERE router_id = dst_router_id
         AND name = '$dstInterface';
 
+
     -- update all service_requests currently pointing to srcInterface
     FOR service_request_row
         IN (SELECT * FROM service_requests WHERE status IS NULL)            
@@ -71,16 +72,17 @@ BEGIN
 
     END LOOP;
 
-    -- update ecircuit_request_datas remote pe
+
+
+    -- update ecircuit_request_datas remote_pe_id if it matches
     MERGE INTO ecircuit_request_datas erd1
     USING (SELECT erd.id FROM ecircuit_request_datas erd, service_requests sr
         WHERE erd.remote_pe_interface_id = src_interface_id
         AND sr.id = erd.service_request_id
-        AND sr.status != 'removed') erd2
-    ON(erd1.id = erd2.id)
+        AND (sr.status != 'removed' OR sr.status IS NULL)) erd2
+    ON (erd1.id = erd2.id)
     WHEN MATCHED THEN
         UPDATE SET erd1.remote_pe_interface_id = dst_interface_id;
-
 
     -- update schedulers
     UPDATE schedulers
