@@ -28,7 +28,7 @@ BEGIN
     FOR service_request_row
         IN (SELECT id, routing_instance_id FROM service_requests
             WHERE pe_interface_id = src_interface_id
-            AND status != 'removed')
+            AND status IS NULL or status != 'removed')
     LOOP
         IF (service_request_row.id IS NULL OR src_router_id = dst_router_id) THEN
             UPDATE service_requests
