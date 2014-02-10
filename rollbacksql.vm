@@ -1,0 +1,43 @@
+DECLARE
+    src_interface_id integer;
+    src_router_id integer;
+    dst_interface_id integer;
+    dst_router_id integer;
+BEGIN
+    -- get source router and interface ids
+    SELECT id INTO src_router_id FROM routers
+        WHERE name = '$srcRouter';
+
+    SELECT id INTO src_interface_id FROM interfaces
+        WHERE router_id = src_router_id
+        AND name = '$srcInterface';
+
+    -- get destination router and interface ids
+    SELECT id INTO dst_router_id FROM routers
+        WHERE name = '$dstRouter';
+
+    SELECT id INTO dst_interface_id FROM interfaces
+        WHERE router_id = dst_router_id
+        AND name = '$dstInterface';
+
+
+
+
+-- update ecircuit_request_datas remote pe
+    MERGE INTO ecircuit_request_datas erd1
+    USING (SELECT erd.id FROM ecricuit_request_datas erd, service_requests sr
+        WHERE erd.remote_pe_interface = dst_interface_id
+        AND sr.id = erd.service_request_id
+        AND sr.status != 'removed') erd2
+    ON(erd1.id = erd2.id)
+    WHEN MATCHED THEN
+        UPDATE SET erd1.remote_pe_interface_id = src_interface_id;
+
+
+    -- update schedulers
+    UPDATE schedulers
+        SET pe_interface_id = src_interface_id
+        WHERE pe_interface_id = dst_interface_id;
+
+
+END;
