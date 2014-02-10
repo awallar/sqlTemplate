@@ -1,8 +1,8 @@
 DECLARE
-    src_interface_id integer;
-    src_router_id integer;
-    dst_interface_id integer;
-    dst_router_id integer;
+    src_interface_id interfaces.id%TYPE;
+    src_router_id routers.id%TYPE;
+    dst_interface_id interfaces.id%TYPE;
+    dst_router_id routers.id%TYPE;
 
 BEGIN
     -- get source router and interface ids
@@ -24,20 +24,18 @@ BEGIN
 
     -- update all service_requests currently pointing to srcInterface
     FOR service_request_row
-        IN (SELECT id, routing_instance_id FROM service_request
+        IN (SELECT id, routing_instance_id FROM service_requests
             WHERE pe_interface_id = src_interface_id
             AND status != 'removed')
     LOOP
-        IF(service_request_row.id IS NULL OR (src_router_id = dst_router_id) THEN
+        IF (service_request_row.id IS NULL OR src_router_id = dst_router_id) THEN
             UPDATE service_requests
                 SET pe_interface_id = dst_interface_id
                 WHERE id = service_request_row.id;
             CONTINUE;
         END IF;
 
-        SELECT to_ri
-
-        --need to check routing_instance here
+        -- TODO need to check routing_instance here
 
     END LOOP;
 

@@ -1,8 +1,9 @@
 DECLARE
-    src_interface_id integer;
-    src_router_id integer;
-    dst_interface_id integer;
-    dst_router_id integer;
+    src_interface_id interfaces.id%TYPE;
+    src_router_id routers.id%TYPE;
+    dst_interface_id interfaces.id%TYPE;
+    dst_router_id routers.id%TYPE;
+
 BEGIN
     -- get source router and interface ids
     SELECT id INTO src_router_id FROM routers
