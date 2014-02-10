@@ -3,16 +3,17 @@ DECLARE
     src_router_id integer;
     dst_interface_id integer;
     dst_router_id integer;
-
+    
+    dst_ri_id integer;
+    new_cerc_inst_id integer;
+    
 BEGIN
     -- get source router and interface ids
     SELECT id INTO src_router_id FROM routers
         WHERE name = '$srcRouter';
-
     SELECT id INTO src_interface_id FROM interfaces
         WHERE router_id = src_router_id
         AND name = '$srcInterface';
-
     -- get destination router and interface ids
     SELECT id INTO dst_router_id FROM routers
         WHERE name = '$dstRouter';
@@ -23,27 +24,57 @@ BEGIN
 
     -- update all service_requests currently pointing to srcInterface
     FOR service_request_row
-        IN (SELECT id, routing_instance_id FROM service_request
-            WHERE pe_interface_id = src_interface_id
-            AND status != 'removed')
+        IN (SELECT * FROM service_requests WHERE status IS NULL)            
     LOOP
-        IF(service_request_row.id IS NULL OR (src_router_id = dst_router_id) THEN
+        IF(service_request_row.id IS NULL OR (src_router_id = dst_router_id)) THEN
             UPDATE service_requests
                 SET pe_interface_id = dst_interface_id
                 WHERE id = service_request_row.id;
             CONTINUE;
         END IF;
 
-        SELECT to_ri
+    --check routing_instance here
+      BEGIN  
+        SELECT to_ri.id INTO dst_ri_id        
+        FROM 
+          routing_instances from_ri,
+          routing_instances to_ri
+        WHERE
+          from_ri.id = service_request_row.routing_instance_id
+          AND from_ri.name = to_ri.name
+          AND to_ri.pe_router_id = dst_router_id;
 
-        --need to check routing_instance here
+      EXCEPTION
+      WHEN NO_DATA_FOUND THEN
+          -- Can't find matching RI on the new router so we must create one.
+
+          -- Get new id field (as used by Rails) for new routing_instance record.
+          SELECT routing_instances_seq.nextval INTO dst_ri_id FROM DUAL;
+
+            INSERT INTO routing_instances (id, name, rd, pe_router_id)
+            SELECT dst_ri_id, name, rd, dst_router_id
+            FROM routing_instances WHERE id=service_request_row.routing_instance_id;
+          
+          INSERT INTO cerc_instances (id, role, topology, cerc_id, routing_instance_id)
+          SELECT cerc_instances_seq.nextval, role, topology,cerc_id, routing_instance_id
+          FROM(
+            SELECT ci.role, ci.topology, ci.cerc_id, ci.routing_instance_id
+            FROM cerc_instances ci
+            WHERE ci.routing_instance_id = service_request_row.routing_instance_id);
+          
+          
+      END;
+      UPDATE service_requests
+      SET pe_interface_id = dst_interface_id
+      WHERE id = service_request_row.id;
+
 
     END LOOP;
 
     -- update ecircuit_request_datas remote pe
     MERGE INTO ecircuit_request_datas erd1
-    USING (SELECT erd.id FROM ecricuit_request_datas erd, service_requests sr
-        WHERE erd.remote_pe_interface = src_interface_id
+    USING (SELECT erd.id FROM ecircuit_request_datas erd, service_requests sr
+        WHERE erd.remote_pe_interface_id = src_interface_id
         AND sr.id = erd.service_request_id
         AND sr.status != 'removed') erd2
     ON(erd1.id = erd2.id)
