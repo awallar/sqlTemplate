@@ -3,8 +3,7 @@ DECLARE
     src_router_id routers.id%TYPE;
     dst_interface_id interfaces.id%TYPE;
     dst_router_id routers.id%TYPE;
-    -- TODO change vars to reference type
-    dst_ri_id integer;
+    dst_ri_id routing_instances.id%TYPE;
     new_cerc_inst_id integer;
 
 BEGIN
@@ -58,6 +57,10 @@ BEGIN
             INSERT INTO routing_instances (id, name, rd, pe_router_id)
                 SELECT dst_ri_id, name, rd, dst_router_id
                     FROM routing_instances WHERE id=service_request_row.routing_instance_id;
+
+            UPDATE service_requests
+                SET routing_instance_id = dst_ri_id
+                WHERE id = service_request_row.id;
           
             INSERT INTO cerc_instances (id, role, topology, cerc_id, routing_instance_id)
                 SELECT cerc_instances_seq.nextval, role, topology,cerc_id, routing_instance_id
