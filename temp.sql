@@ -101,7 +101,7 @@ BEGIN
         UPDATE service_requests
         SET    pe_interface_id = dst_interface_id
         WHERE  id = service_request_row.id;
-    
+
     END LOOP;
 
     -- update ecircuit_request_datas remote_pe_id if it matches
@@ -121,5 +121,4 @@ BEGIN
     UPDATE schedulers
     SET    pe_interface_id = dst_interface_id
     WHERE  pe_interface_id = src_interface_id;
-
 END; 
