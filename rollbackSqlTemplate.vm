@@ -3,6 +3,7 @@ DECLARE
     src_router_id    routers.id%TYPE;
     dst_interface_id interfaces.id%TYPE;
     dst_router_id    routers.id%TYPE;
+    dst_ri_id        routing_instances.id%TYPE;
 BEGIN
     -- get source router and interface ids
     SELECT id
