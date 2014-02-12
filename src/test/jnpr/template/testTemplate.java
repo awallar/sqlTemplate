@@ -11,16 +11,20 @@ import java.io.StringWriter;
 
 public class testTemplate {
 
-    public static void main(String args[]) throws Exception{
+  public static void main(String args[]) throws Exception{
+    String srcInterface = "srcInterfaceReal";
+    String srcRouter = "srcRouterReal";
+    String dstInterface = "dstInterfaceReal";
+    String dstRouter = "dstRouterReal";
 
-        String srcInterface = "srcInterfaceReal";
-        String srcRouter = "srcRouterReal";
-        String dstInterface = "dstInterfaceReal";
-        String dstRouter = "dstRouterReal";
-        String templateFile= "sqltemplate.vm";
-        String templatePath= "/Users/jnickerson/Documents/develop/juniper/Optus/sqlTemplate";
+    ProjenMigrator pm = new ProjenMigrator(srcInterface, srcRouter, dstInterface, dstRouter);
 
-        sqlTemplate ST= new sqlTemplate(srcInterface,srcRouter,dstInterface,dstRouter, templateFile,templatePath);
-        ST.evaluate();
+    String migrationSql = pm.getMigrationSql();
+
+    String rollbackSql = pm.getRollbackSql();
+
+    System.out.println(migrationSql);
+    System.out.println(rollbackSql);
+
     }
 }
